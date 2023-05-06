@@ -4,4 +4,3 @@ export CROSS_COMPILE=arm-openwrt-linux-
 export STAGING_DIR=$(realpath .)/../staging_dir/
 export HOSTLDFLAGS=-L$STAGING_DIR/usr/lib\ -znow\ -zrelro\ -pie
 export TARGETCC=arm-openwrt-linux-gcc
-export HOSTSTRIP=true
