@@ -1,7 +1,7 @@
 #define GPIO_WHITE_LED 35
 #define GPIO_BLUE_LED 37
-#define GPIO_RESET_BTN 18
-#define GPIO_WPS_BTN 9
+#define GPIO_RESET_BTN 9
+#define GPIO_WPS_BTN 8
 
 #define GL_RESET_BUTTON_IS_PRESS        0
 

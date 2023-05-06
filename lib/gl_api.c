@@ -38,7 +38,7 @@ void check_button_is_press(void)
 {
 	int counter = 0;
 
-	while(button_is_press(GPIO_RESET_BTN, GL_RESET_BUTTON_IS_PRESS)){
+	while(button_is_press(GPIO_WPS_BTN, GL_RESET_BUTTON_IS_PRESS)){
 		
 		if(counter == 0)
 			printf("Reset button is pressed for: %2d ", counter);
