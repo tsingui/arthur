@@ -1,3 +1,5 @@
+u-uboot-2016 source code base on https://github.com/gl-inet/uboot-ipq60xx
+
 ## 1. build
 
 ```
