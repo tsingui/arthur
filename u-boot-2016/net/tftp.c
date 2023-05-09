@@ -27,7 +27,7 @@
 /* # of timeouts before giving up */
 # define TIMEOUT_COUNT	10
 #else
-# define TIMEOUT_COUNT  0
+# define TIMEOUT_COUNT  (CONFIG_NET_RETRY_COUNT * 2)
 #endif
 /* Number of "loading" hashes per line (for checking the image size) */
 #define HASHES_PER_LINE	65
@@ -283,7 +283,7 @@ static void show_block_marker(void)
 		else if ((tftp_cur_block % (10 * HASHES_PER_LINE)) == 0)
 			puts("\n\t ");
 		else if ((tftp_cur_block % (10 * 40)) == 0)
-			led_toggle(GPIO_BLUE_LED);
+			led_toggle(GPIO_RED_LED);
 	}
 }
 
@@ -342,7 +342,7 @@ static void tftp_complete(void)
 			time_start * 1000, "/s");
 	}
 	puts("\ndone\n");
-	gpio_set_value(GPIO_BLUE_LED, LED_ON);
+	gpio_set_value(GPIO_RED_LED, LED_ON);
 	net_set_state(NETLOOP_SUCCESS);
 }
 
