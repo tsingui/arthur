@@ -103,6 +103,7 @@ const uchar default_environment[] = {
 #ifdef	CONFIG_EXTRA_ENV_SETTINGS
 	CONFIG_EXTRA_ENV_SETTINGS
 #endif
+	"\0"
 #ifdef DEFAULT_ENV_INSTANCE_EMBEDDED
 	}
 #endif
