@@ -134,7 +134,7 @@ int qca_gpio_deinit(int offset)
 	return 0;
 }
 
-void gl_led_booting()
+void gl_led_booting(void)
 {
 	//gpio_set_value(GPIO_RED_LED, 0x0);
 	//gpio_set_value(GPIO_GREEN_LED, 0x0);
