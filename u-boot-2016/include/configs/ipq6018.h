@@ -267,11 +267,11 @@ extern loff_t board_env_size;
 #define CONFIG_SYS_MEMTEST_END		CONFIG_SYS_MEMTEST_START + 0x100
 
 /* NSS firmware loaded using bootm */
-#define CONFIG_BOOTCOMMAND		"bootipq; ping 192.168.1.2; run lfq; bootipq; run lf; bootipq; httpd 192.168.1.1; reset"
+#define CONFIG_BOOTCOMMAND		"bootipq; httpd 192.168.1.1; reset"
 #define CONFIG_BOOTARGS			"console=ttyMSM0,115200n8"
 #define QCA_ROOT_FS_PART_NAME		"rootfs"
 
-#define CONFIG_BOOTDELAY		2
+#define CONFIG_BOOTDELAY		3
 
 #define CONFIG_MTD_DEVICE
 #define CONFIG_CMD_MTDPARTS
@@ -362,9 +362,9 @@ extern loff_t board_env_size;
 #define IPQ_UBI_VOL_WRITE_SUPPORT
 #define CONFIG_HTTPD
 #define CONFIG_CMD_GPIO
-#define CONFIG_AUTOBOOT_KEYED
+/*#define CONFIG_AUTOBOOT_KEYED
 #define CONFIG_AUTOBOOT_PROMPT "Hit \"%s\" key to stop booting in %d seconds\n"
-#define CONFIG_AUTOBOOT_STOP_STR "gl"
+#define CONFIG_AUTOBOOT_STOP_STR "gl"*/
 
 #define CONFIG_WINDOWS_UPGRADE_SUPPORT
 

@@ -136,7 +136,8 @@ int qca_gpio_deinit(int offset)
 
 void gl_led_booting()
 {
-	//gpio_set_value(GPIO_WHITE_LED, 0x0);
+	//gpio_set_value(GPIO_RED_LED, 0x0);
+	//gpio_set_value(GPIO_GREEN_LED, 0x0);
 	//gpio_set_value(GPIO_BLUE_LED, 0x0);
 }
 
@@ -144,25 +145,31 @@ void gl_led_init(void)
 {
 	unsigned int *gpio_base;
 
-	gpio_base = (unsigned int *)GPIO_CONFIG_ADDR(GPIO_WHITE_LED);
+	gpio_base = (unsigned int *)GPIO_CONFIG_ADDR(GPIO_RED_LED);
 	writel(0x203, gpio_base);
-	gpio_direction_output(GPIO_WHITE_LED, 0x1);
+	gpio_direction_output(GPIO_RED_LED, 0x1);
+	
+	gpio_base = (unsigned int *)GPIO_CONFIG_ADDR(GPIO_GREEN_LED);
+	writel(0x203, gpio_base);
+	gpio_direction_output(GPIO_GREEN_LED, 0x1);
 
 	gpio_base = (unsigned int *)GPIO_CONFIG_ADDR(GPIO_BLUE_LED);
 	writel(0x203, gpio_base);
 	gpio_direction_output(GPIO_BLUE_LED, 0x1);
 
-	gpio_set_value(GPIO_WHITE_LED, 0x1);
+	gpio_set_value(GPIO_RED_LED, 0x1);
+	gpio_set_value(GPIO_GREEN_LED, 0x1);
 	gpio_set_value(GPIO_BLUE_LED, 0x1);
 	mdelay(1000);
-	gpio_set_value(GPIO_WHITE_LED, 0x0);
+	gpio_set_value(GPIO_GREEN_LED, 0x0);
+	gpio_set_value(GPIO_BLUE_LED, 0x0);
 }
 
 void gl_btn_init(void)
 {
 	unsigned int *gpio_base;
 
-	gpio_base = (unsigned int *)GPIO_CONFIG_ADDR(GPIO_WPS_BTN);
+	gpio_base = (unsigned int *)GPIO_CONFIG_ADDR(GPIO_JOYLINK_BTN);
 	writel(0xc3, gpio_base);
 
 	gpio_base = (unsigned int *)GPIO_CONFIG_ADDR(GPIO_RESET_BTN);

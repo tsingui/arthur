@@ -21,16 +21,16 @@
 
 	aliases {
 		console = "/serial@78B1000";
-		mmc = "/sdhci@7804000";
 		usb0 = "/xhci@8a00000";
 		i2c1 = "/i2c@78ba000";
 	};
 	ess-switch {
 		switch_mac_mode = <PORT_WRAPPER_PSGMII>;
 		switch_mac_mode1 = <UNUSED>;
-		malibu_gpio = <74>;
+		malibu_gpio = <75>;
 		malibu_gpio_cnt = <1>;
 		mdc_mdio_gpio = <64 65>;
+		malibu2port_phy = <1>;
 		port_phyinfo {
 			port@0 {
 				phy_address = <0>;
@@ -41,7 +41,7 @@
 				phy_type = <MALIBU_PHY_TYPE>;
 			};
 			port@2 {
-				phy_address = <2>;
+				phy_address = <4>;
 				phy_type = <MALIBU_PHY_TYPE>;
 			};
 			port@3 {
@@ -49,7 +49,7 @@
 				phy_type = <MALIBU_PHY_TYPE>;
 			};
 			port@4 {
-				phy_address = <4>;
+				phy_address = <2>;
 				phy_type = <MALIBU_PHY_TYPE>;
 			};
 		};

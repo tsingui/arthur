@@ -92,19 +92,27 @@ void printChecksumMd5(int address,unsigned int size)
 #endif
 
 int do_http_upgrade(const ulong size, const int upgrade_type){
-	char buf[96];
+	//char buf[96];
+	char buf[396];
+	//为了能加入更多命令，加大的了buf
 	//printf checksum if defined
 	printChecksumMd5(WEBFAILSAFE_UPLOAD_RAM_ADDRESS,size);
 
 	if(upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_UBOOT){
 		printf("\n\n****************************\n*     U-BOOT UPGRADING     *\n* DO NOT POWER OFF DEVICE! *\n****************************\n\n");
-		if(qca_smem_flash_info.flash_type==6)
-			sprintf(buf,
-				"sf probe && sf update 0x%lx 0x%lx 0x%lx",
-				(unsigned long int)WEBFAILSAFE_UPLOAD_RAM_ADDRESS,
-				(unsigned long int)WEBFAILSAFE_UPLOAD_UBOOT_ADDRESS,
-				(unsigned long int)size);
-		else if(qca_smem_flash_info.flash_type==2)
+		//arch/arm/include/asm/arch-qca-common/smem.h
+		//SMEM_BOOT_NO_FLASH        = 0,
+		//SMEM_BOOT_NOR_FLASH       = 1,
+		//SMEM_BOOT_NAND_FLASH      = 2,
+		//SMEM_BOOT_ONENAND_FLASH   = 3,
+		//SMEM_BOOT_SDC_FLASH       = 4,
+		//SMEM_BOOT_MMC_FLASH       = 5,
+		//SMEM_BOOT_SPI_FLASH       = 6,
+		//SMEM_BOOT_NORPLUSNAND     = 7,
+		//SMEM_BOOT_NORPLUSEMMC     = 8,
+		if(qca_smem_flash_info.flash_type==5){
+			sprintf(buf,"mmc dev 0 && flash 0:APPSBL && flash 0:APPSBL_1");
+		}else if(qca_smem_flash_info.flash_type==2){
 			sprintf(buf,
 				"nand erase 0x%lx 0x%lx; nand write 0x%lx 0x%lx 0x%lx",
 				(unsigned long int)WEBFAILSAFE_UPLOAD_UBOOT_ADDRESS_NAND,
@@ -112,23 +120,50 @@ int do_http_upgrade(const ulong size, const int upgrade_type){
 				(unsigned long int)WEBFAILSAFE_UPLOAD_RAM_ADDRESS,
 				(unsigned long int)WEBFAILSAFE_UPLOAD_UBOOT_ADDRESS_NAND,
 				(unsigned long int)((size/131072+(size%131072!=0))*131072));
-	} else if(upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_FIRMWARE){
-		if(check_fw_type((void *)WEBFAILSAFE_UPLOAD_RAM_ADDRESS)==FW_TYPE_NOR){
-		//固件在nor的情况，不会发生
-		printf("\n\n****************************\n*    FIRMWARE UPGRADING    *\n* DO NOT POWER OFF DEVICE! *\n****************************\n\n");
-		sprintf(buf,
+		}else if(qca_smem_flash_info.flash_type==6){
+			sprintf(buf,
 				"sf probe && sf update 0x%lx 0x%lx 0x%lx",
 				(unsigned long int)WEBFAILSAFE_UPLOAD_RAM_ADDRESS,
-				(unsigned long int)WEBFAILSAFE_UPLOAD_FW_ADDRESS,
+				(unsigned long int)WEBFAILSAFE_UPLOAD_UBOOT_ADDRESS,
 				(unsigned long int)size);
-		}else if(check_fw_type((void *)WEBFAILSAFE_UPLOAD_RAM_ADDRESS)==FW_TYPE_EMMC){
-		//固件为emmc mbr分区的情况，不会发生
+		}
+	} else if(upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_FIRMWARE){
+		//include/gl_api.h
+		//FW_TYPE_NOR	0 这个是刷写固件分区，所以在这里刷写eMMC固件分区
+		//FW_TYPE_EMMC	1 这个是刷写eMMC镜像，不是刷写固件分区
+		//FW_TYPE_QSDK	2
+		//FW_TYPE_UBI	3
+		if(check_fw_type((void *)WEBFAILSAFE_UPLOAD_RAM_ADDRESS)==FW_TYPE_NOR){
+			//固件在nor的情况，不会发生
 			printf("\n\n****************************\n*    FIRMWARE UPGRADING    *\n* DO NOT POWER OFF DEVICE! *\n****************************\n\n");
-			sprintf(buf,
-					"mmc dev 0 && mmc erase 0 0x109800 && mmc write 0x%lx 0x%lx 0x%lx",
-					(unsigned long int)WEBFAILSAFE_UPLOAD_RAM_ADDRESS,
-					(unsigned long int)0x0,
-					(unsigned long int)(size/512+1));
+			sprintf(buf,"mmc dev 0 && flash 0:HLOS 0x%lx 0x%lx && flash rootfs 0x%lx 0x%lx && mmc read 0x%lx 0x622 0x200 && mw.b 0x%lx 0x08 0x1 && mw.b 0x%lx 0x00 0x1 && mw.b 0x%lx 0x00 0x1 && mw.b 0x%lx 0x00 0x1 && flash 0:BOOTCONFIG 0x%lx 0x40000 && flash 0:BOOTCONFIG1 0x%lx 0x40000",
+				(unsigned long int)WEBFAILSAFE_UPLOAD_RAM_ADDRESS,
+				(unsigned long int)0x600000,
+				(unsigned long int)(WEBFAILSAFE_UPLOAD_RAM_ADDRESS+0x600000),
+				(unsigned long int)(size-0x600000),
+				//这部分改两个BOOTCONFIG，启动系统0，即rootfs
+				(unsigned long int)WEBFAILSAFE_UPLOAD_RAM_ADDRESS,
+				(unsigned long int)(WEBFAILSAFE_UPLOAD_RAM_ADDRESS+0x4),
+				(unsigned long int)(WEBFAILSAFE_UPLOAD_RAM_ADDRESS+0x80),
+				(unsigned long int)(WEBFAILSAFE_UPLOAD_RAM_ADDRESS+0x94),
+				(unsigned long int)(WEBFAILSAFE_UPLOAD_RAM_ADDRESS+0xA8),
+				(unsigned long int)WEBFAILSAFE_UPLOAD_RAM_ADDRESS,
+				(unsigned long int)WEBFAILSAFE_UPLOAD_RAM_ADDRESS);
+			//sprintf(buf,
+				//"sf probe && sf update 0x%lx 0x%lx 0x%lx",
+				//(unsigned long int)WEBFAILSAFE_UPLOAD_RAM_ADDRESS,
+				//(unsigned long int)WEBFAILSAFE_UPLOAD_FW_ADDRESS,
+				//(unsigned long int)size);
+		}else if(check_fw_type((void *)WEBFAILSAFE_UPLOAD_RAM_ADDRESS)==FW_TYPE_EMMC){
+			//固件为emmc mbr分区的情况，不会发生
+			printf("\n\n****************************\n*    FIRMWARE UPGRADING    *\n* DO NOT POWER OFF DEVICE! *\n****************************\n\n");
+			printf("\n\n* DO NOT SUPPORT eMMC IMAGE!! *\n\n");
+			return(-1);
+			//sprintf(buf,
+				//"mmc dev 0 && mmc erase 0 0x109800 && mmc write 0x%lx 0x%lx 0x%lx",
+				//(unsigned long int)WEBFAILSAFE_UPLOAD_RAM_ADDRESS,
+				//(unsigned long int)0x0,
+				//(unsigned long int)(size/512+1));
 		}else if(check_fw_type((void *)WEBFAILSAFE_UPLOAD_RAM_ADDRESS)==FW_TYPE_QSDK){
 			printf("\n\n****************************\n*    FIRMWARE UPGRADING    *\n* DO NOT POWER OFF DEVICE! *\n****************************\n\n");
 			sprintf(buf, "sf probe; imgaddr=0x%lx && source $imgaddr:script", (unsigned long int)WEBFAILSAFE_UPLOAD_RAM_ADDRESS);
@@ -142,13 +177,9 @@ int do_http_upgrade(const ulong size, const int upgrade_type){
 		// TODO: add option to change ART partition offset,
 		// for those who want to use OFW on router with replaced/bigger FLASH
 		printf("\n\n****************************\n*      ART  UPGRADING      *\n* DO NOT POWER OFF DEVICE! *\n****************************\n\n");
-		if(qca_smem_flash_info.flash_type==6)
-			sprintf(buf,
-				"sf probe && sf update 0x%lx 0x%lx 0x%lx",
-				(unsigned long int)WEBFAILSAFE_UPLOAD_RAM_ADDRESS,
-				(unsigned long int)WEBFAILSAFE_UPLOAD_ART_ADDRESS,
-				(unsigned long int)size);
-		else
+		if(qca_smem_flash_info.flash_type==5){
+			sprintf(buf,"mmc dev 0 && flash 0:ART");
+		}else if(qca_smem_flash_info.flash_type==2){
 			sprintf(buf,
 				"nand erase 0x%lx 0x%lx; nand write 0x%lx 0x%lx 0x%lx",
 				(unsigned long int)WEBFAILSAFE_UPLOAD_ART_ADDRESS_NAND,
@@ -156,6 +187,13 @@ int do_http_upgrade(const ulong size, const int upgrade_type){
 				(unsigned long int)WEBFAILSAFE_UPLOAD_RAM_ADDRESS,
 				(unsigned long int)WEBFAILSAFE_UPLOAD_ART_ADDRESS_NAND,
 				(unsigned long int)((size/131072+(size%131072!=0))*131072));
+		}else if(qca_smem_flash_info.flash_type==6){
+			sprintf(buf,
+				"sf probe && sf update 0x%lx 0x%lx 0x%lx",
+				(unsigned long int)WEBFAILSAFE_UPLOAD_RAM_ADDRESS,
+				(unsigned long int)WEBFAILSAFE_UPLOAD_ART_ADDRESS,
+				(unsigned long int)size);
+		}
 	}
 	else {
 		return(-1);

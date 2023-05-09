@@ -80,7 +80,7 @@ static void httpd_download_progress(void){
 
 	if (post_line_counter == 10) {
 		post_line_counter = 0;
-		led_toggle(GPIO_BLUE_LED);
+		led_toggle(GPIO_RED_LED);
 	}
 	puts("#");
 	post_packet_counter++;
@@ -290,7 +290,7 @@ void httpd_appcall(void){
 					hs->state = STATE_FILE_REQUEST;
 				} else if(uip_appdata[0] == ISO_P && uip_appdata[1] == ISO_O && uip_appdata[2] == ISO_S && uip_appdata[3] == ISO_T && (uip_appdata[4] == ISO_space || uip_appdata[4] == ISO_tab)){
 					hs->state = STATE_UPLOAD_REQUEST;
-					gpio_set_value(GPIO_WHITE_LED, LED_OFF);
+					gpio_set_value(GPIO_BLUE_LED, LED_OFF);
 				}
 
 				// anything else -> abort the connection!
@@ -575,7 +575,7 @@ void httpd_appcall(void){
 					if(hs->upload >= hs->upload_total+strlen(boundary_value)+6){
 
 						printf("\n\ndone!\n");
-						gpio_set_value(GPIO_BLUE_LED, LED_ON);
+						gpio_set_value(GPIO_RED_LED, LED_ON);
 
 						// end of post upload
 						webfailsafe_post_done = 1;

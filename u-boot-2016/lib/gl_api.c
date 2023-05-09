@@ -43,9 +43,9 @@ void check_button_is_press(void)
 		if(counter == 0)
 			printf("Reset button is pressed for: %2d ", counter);
 		
-		gpio_set_value(GPIO_BLUE_LED, 0);
+		gpio_set_value(GPIO_RED_LED, 0);
 		mdelay(600);
-		gpio_set_value(GPIO_BLUE_LED, 1);
+		gpio_set_value(GPIO_RED_LED, 1);
 		mdelay(600);
 
 		counter++;
@@ -54,8 +54,8 @@ void check_button_is_press(void)
 		printf("\b\b\b%2d ", counter);
 
 		if(counter >= 5){
-			gpio_set_value(GPIO_BLUE_LED, 0);
-			gpio_set_value(GPIO_WHITE_LED, 1);
+			gpio_set_value(GPIO_RED_LED, 0);
+			gpio_set_value(GPIO_BLUE_LED, 1);
 			run_command("httpd 192.168.1.1", 0);
 			run_command("res", 0);
 			break;
