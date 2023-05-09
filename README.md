@@ -1,11 +1,11 @@
 ## 1. build
 
 ```
-cd uboot-ipq60xx/
+cd u-boot-2016/
 . ../env.sh
 
 make ipq6018_defconfig
-make menuconfig
+# make menuconfig
 make V=s
 ```
 
@@ -19,3 +19,5 @@ arm-openwrt-linux-strip u-boot
 ```
 python2.7 scripts_mbn/elftombn.py -f ./u-boot -o ./u-boot.mbn -v 6
 ```
+
+The uboot binary will be: u-boot-2016/u-boot.mbn
