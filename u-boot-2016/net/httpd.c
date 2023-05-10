@@ -111,7 +111,10 @@ int do_http_upgrade(const ulong size, const int upgrade_type){
 		//SMEM_BOOT_NORPLUSNAND     = 7,
 		//SMEM_BOOT_NORPLUSEMMC     = 8,
 		if(qca_smem_flash_info.flash_type==5){
-			sprintf(buf,"mmc dev 0 && flash 0:APPSBL && flash 0:APPSBL_1");
+			//mw 0x%lx 0x00 0x200 擦除内存中上传文件后面的512字节，防止文件不够512字节写入文件后其他字符到eMMC
+			//其实测试不擦除文件后内存，写入一些其他字符也可以正常启动
+			sprintf(buf,"mmc dev 0 && mw 0x%lx 0x00 0x200 && flash 0:APPSBL && flash 0:APPSBL_1",
+				(unsigned long int)(WEBFAILSAFE_UPLOAD_RAM_ADDRESS+size));
 		}else if(qca_smem_flash_info.flash_type==2){
 			sprintf(buf,
 				"nand erase 0x%lx 0x%lx; nand write 0x%lx 0x%lx 0x%lx",
@@ -136,7 +139,10 @@ int do_http_upgrade(const ulong size, const int upgrade_type){
 		if(check_fw_type((void *)WEBFAILSAFE_UPLOAD_RAM_ADDRESS)==FW_TYPE_NOR){
 			//固件在nor的情况，不会发生
 			printf("\n\n****************************\n*    FIRMWARE UPGRADING    *\n* DO NOT POWER OFF DEVICE! *\n****************************\n\n");
-			sprintf(buf,"mmc dev 0 && flash 0:HLOS 0x%lx 0x%lx && flash rootfs 0x%lx 0x%lx && mmc read 0x%lx 0x622 0x200 && mw.b 0x%lx 0x00 0x1 && mw.b 0x%lx 0x00 0x1 && mw.b 0x%lx 0x00 0x1 && flash 0:BOOTCONFIG 0x%lx 0x40000 && flash 0:BOOTCONFIG1 0x%lx 0x40000",
+			sprintf(buf,"mmc dev 0 && mw 0x%lx 0x00 0x200 && flash 0:HLOS 0x%lx 0x%lx && flash rootfs 0x%lx 0x%lx && mmc read 0x%lx 0x622 0x200 && mw.b 0x%lx 0x00 0x1 && mw.b 0x%lx 0x00 0x1 && mw.b 0x%lx 0x00 0x1 && flash 0:BOOTCONFIG 0x%lx 0x40000 && flash 0:BOOTCONFIG1 0x%lx 0x40000",
+				//mw 0x%lx 0x00 0x200 擦除内存中上传文件后面的512字节，防止文件不够512字节写入文件后其他字符到eMMC
+				//其实测试不擦除文件后内存，写入一些其他字符也可以正常启动
+				(unsigned long int)(WEBFAILSAFE_UPLOAD_RAM_ADDRESS+size),
 				//factory.bin由kernel+rootfs组成，其中kernel固定6MB大小
 				(unsigned long int)WEBFAILSAFE_UPLOAD_RAM_ADDRESS,
 				(unsigned long int)0x600000,
@@ -167,6 +173,7 @@ int do_http_upgrade(const ulong size, const int upgrade_type){
 		}else if(check_fw_type((void *)WEBFAILSAFE_UPLOAD_RAM_ADDRESS)==FW_TYPE_QSDK){
 			printf("\n\n****************************\n*    FIRMWARE UPGRADING    *\n* DO NOT POWER OFF DEVICE! *\n****************************\n\n");
 			sprintf(buf,"mmc dev 0 && imxtract 0x%lx hlos-0cc33b23252699d495d79a843032498bfa593aba && flash 0:HLOS $fileaddr $filesize && imxtract 0x%lx rootfs-f3c50b484767661151cfb641e2622703e45020fe && flash rootfs $fileaddr $filesize && mmc read 0x%lx 0x622 0x200 && mw.b 0x%lx 0x00 0x1 && mw.b 0x%lx 0x00 0x1 && mw.b 0x%lx 0x00 0x1 && flash 0:BOOTCONFIG 0x%lx 0x40000 && flash 0:BOOTCONFIG1 0x%lx 0x40000",
+				//官方固件本身各个固件后面有填充0，所以不用修改上传文件后的内存
 				//执行imxtract时不带目标地址，则不进行复制，但会修改环境变量$fileaddr $filesize，可以直接用
 				(unsigned long int)WEBFAILSAFE_UPLOAD_RAM_ADDRESS,
 				(unsigned long int)WEBFAILSAFE_UPLOAD_RAM_ADDRESS,
@@ -189,7 +196,8 @@ int do_http_upgrade(const ulong size, const int upgrade_type){
 		// for those who want to use OFW on router with replaced/bigger FLASH
 		printf("\n\n****************************\n*      ART  UPGRADING      *\n* DO NOT POWER OFF DEVICE! *\n****************************\n\n");
 		if(qca_smem_flash_info.flash_type==5){
-			sprintf(buf,"mmc dev 0 && flash 0:ART");
+			sprintf(buf,"mmc dev 0 && mw 0x%lx 0x00 0x200 && flash 0:ART",
+				(unsigned long int)(WEBFAILSAFE_UPLOAD_RAM_ADDRESS+size));
 		}else if(qca_smem_flash_info.flash_type==2){
 			sprintf(buf,
 				"nand erase 0x%lx 0x%lx; nand write 0x%lx 0x%lx 0x%lx",
