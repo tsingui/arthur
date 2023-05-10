@@ -93,7 +93,7 @@ void printChecksumMd5(int address,unsigned int size)
 
 int do_http_upgrade(const ulong size, const int upgrade_type){
 	//char buf[96];
-	char buf[396];
+	char buf[512];
 	//为了能加入更多命令，加大的了buf
 	//printf checksum if defined
 	printChecksumMd5(WEBFAILSAFE_UPLOAD_RAM_ADDRESS,size);
@@ -129,21 +129,21 @@ int do_http_upgrade(const ulong size, const int upgrade_type){
 		}
 	} else if(upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_FIRMWARE){
 		//include/gl_api.h
-		//FW_TYPE_NOR	0 这个是刷写固件分区，所以在这里刷写eMMC固件分区
+		//FW_TYPE_NOR	0 这个是刷写固件分区，factory固件
 		//FW_TYPE_EMMC	1 这个是刷写eMMC镜像，不是刷写固件分区
-		//FW_TYPE_QSDK	2
+		//FW_TYPE_QSDK	2 这个官方原厂固件img
 		//FW_TYPE_UBI	3
 		if(check_fw_type((void *)WEBFAILSAFE_UPLOAD_RAM_ADDRESS)==FW_TYPE_NOR){
 			//固件在nor的情况，不会发生
 			printf("\n\n****************************\n*    FIRMWARE UPGRADING    *\n* DO NOT POWER OFF DEVICE! *\n****************************\n\n");
-			sprintf(buf,"mmc dev 0 && flash 0:HLOS 0x%lx 0x%lx && flash rootfs 0x%lx 0x%lx && mmc read 0x%lx 0x622 0x200 && mw.b 0x%lx 0x08 0x1 && mw.b 0x%lx 0x00 0x1 && mw.b 0x%lx 0x00 0x1 && mw.b 0x%lx 0x00 0x1 && flash 0:BOOTCONFIG 0x%lx 0x40000 && flash 0:BOOTCONFIG1 0x%lx 0x40000",
+			sprintf(buf,"mmc dev 0 && flash 0:HLOS 0x%lx 0x%lx && flash rootfs 0x%lx 0x%lx && mmc read 0x%lx 0x622 0x200 && mw.b 0x%lx 0x00 0x1 && mw.b 0x%lx 0x00 0x1 && mw.b 0x%lx 0x00 0x1 && flash 0:BOOTCONFIG 0x%lx 0x40000 && flash 0:BOOTCONFIG1 0x%lx 0x40000",
+				//factory.bin由kernel+rootfs组成，其中kernel固定6MB大小
 				(unsigned long int)WEBFAILSAFE_UPLOAD_RAM_ADDRESS,
 				(unsigned long int)0x600000,
 				(unsigned long int)(WEBFAILSAFE_UPLOAD_RAM_ADDRESS+0x600000),
 				(unsigned long int)(size-0x600000),
 				//这部分改两个BOOTCONFIG，启动系统0，即rootfs
 				(unsigned long int)WEBFAILSAFE_UPLOAD_RAM_ADDRESS,
-				(unsigned long int)(WEBFAILSAFE_UPLOAD_RAM_ADDRESS+0x4),
 				(unsigned long int)(WEBFAILSAFE_UPLOAD_RAM_ADDRESS+0x80),
 				(unsigned long int)(WEBFAILSAFE_UPLOAD_RAM_ADDRESS+0x94),
 				(unsigned long int)(WEBFAILSAFE_UPLOAD_RAM_ADDRESS+0xA8),
@@ -166,7 +166,18 @@ int do_http_upgrade(const ulong size, const int upgrade_type){
 				//(unsigned long int)(size/512+1));
 		}else if(check_fw_type((void *)WEBFAILSAFE_UPLOAD_RAM_ADDRESS)==FW_TYPE_QSDK){
 			printf("\n\n****************************\n*    FIRMWARE UPGRADING    *\n* DO NOT POWER OFF DEVICE! *\n****************************\n\n");
-			sprintf(buf, "sf probe; imgaddr=0x%lx && source $imgaddr:script", (unsigned long int)WEBFAILSAFE_UPLOAD_RAM_ADDRESS);
+			sprintf(buf,"mmc dev 0 && imxtract 0x%lx hlos-0cc33b23252699d495d79a843032498bfa593aba && flash 0:HLOS $fileaddr $filesize && imxtract 0x%lx rootfs-f3c50b484767661151cfb641e2622703e45020fe && flash rootfs $fileaddr $filesize && mmc read 0x%lx 0x622 0x200 && mw.b 0x%lx 0x00 0x1 && mw.b 0x%lx 0x00 0x1 && mw.b 0x%lx 0x00 0x1 && flash 0:BOOTCONFIG 0x%lx 0x40000 && flash 0:BOOTCONFIG1 0x%lx 0x40000",
+				//执行imxtract时不带目标地址，则不进行复制，但会修改环境变量$fileaddr $filesize，可以直接用
+				(unsigned long int)WEBFAILSAFE_UPLOAD_RAM_ADDRESS,
+				(unsigned long int)WEBFAILSAFE_UPLOAD_RAM_ADDRESS,
+				//这部分改两个BOOTCONFIG，启动系统0，即rootfs
+				(unsigned long int)WEBFAILSAFE_UPLOAD_RAM_ADDRESS,
+				(unsigned long int)(WEBFAILSAFE_UPLOAD_RAM_ADDRESS+0x80),
+				(unsigned long int)(WEBFAILSAFE_UPLOAD_RAM_ADDRESS+0x94),
+				(unsigned long int)(WEBFAILSAFE_UPLOAD_RAM_ADDRESS+0xA8),
+				(unsigned long int)WEBFAILSAFE_UPLOAD_RAM_ADDRESS,
+				(unsigned long int)WEBFAILSAFE_UPLOAD_RAM_ADDRESS);
+			//*sprintf(buf, "sf probe; imgaddr=0x%lx && source $imgaddr:script", (unsigned long int)WEBFAILSAFE_UPLOAD_RAM_ADDRESS);
 		}else if(check_fw_type((void *)WEBFAILSAFE_UPLOAD_RAM_ADDRESS)==FW_TYPE_UBI){
 			printf("\n\n****************************\n*    FIRMWARE UPGRADING    *\n* DO NOT POWER OFF DEVICE! *\n****************************\n\n");
 			sprintf(buf, "nand erase 0xa00000 0x7300000; nand write 0x%lx 0xa00000 0x%lx", (unsigned long int)WEBFAILSAFE_UPLOAD_RAM_ADDRESS, (unsigned long int)size);

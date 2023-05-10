@@ -93,12 +93,12 @@ void main_loop(void)
 	s = bootdelay_process();
 	if (cli_process_fdt(&s))
 		cli_secure_boot_cmd(s);
-
+/*
 #ifdef CONFIG_WINDOWS_UPGRADE_SUPPORT
     //printf("delay 3");
     mdelay(3000);
 #endif
-
+*/
 	autoboot_command(s);
 
 	cli_loop();
