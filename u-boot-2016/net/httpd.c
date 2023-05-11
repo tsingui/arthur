@@ -14,6 +14,7 @@
 #include "../httpd/uip.h"
 #include "../httpd/uip_arp.h"
 #include <gl_api.h>
+#include <asm/gpio.h>
 
 // extern flash_info_t flash_info[];
 
@@ -237,7 +238,9 @@ int do_http_progress(const int state){
 			// 	all_led_off();
 			// 	milisecdelay(25);
 			// }
-
+			gpio_set_value(GPIO_RED_LED, LED_OFF);
+			gpio_set_value(GPIO_GREEN_LED, LED_OFF);
+			gpio_set_value(GPIO_BLUE_LED, LED_ON);
 			printf("HTTP server is ready!\n\n");
 			break;
 
@@ -250,7 +253,11 @@ int do_http_progress(const int state){
 			break;
 
 		case WEBFAILSAFE_PROGRESS_UPGRADE_READY:
+			gpio_set_value(GPIO_RED_LED, LED_OFF);
+			gpio_set_value(GPIO_GREEN_LED, LED_ON);
+			gpio_set_value(GPIO_BLUE_LED, LED_OFF);
 			printf("HTTP ugrade is done! Rebooting...\n\n");
+			mdelay(3000);
 			break;
 
 		case WEBFAILSAFE_PROGRESS_UPGRADE_FAILED:
