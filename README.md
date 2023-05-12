@@ -1,9 +1,7 @@
 You will also like to see https://github.com/lgs2007m/cdt-gpt-ipq60xx-generate
 
-
+## uboot build 
 u-boot-2016 source code base on https://github.com/gl-inet/uboot-ipq60xx
-
-## clone and build uboot
 
 PS: The mbn scripts run with python2.7, you should install and switch to python2.7.
 ```
