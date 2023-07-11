@@ -94,7 +94,7 @@ void printChecksumMd5(int address,unsigned int size)
 
 int do_http_upgrade(const ulong size, const int upgrade_type){
 	//char buf[96];
-	char buf[512];
+	char buf[576];
 	//为了能加入更多命令，加大的了buf
 	//printf checksum if defined
 	printChecksumMd5(WEBFAILSAFE_UPLOAD_RAM_ADDRESS,size);
